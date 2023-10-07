@@ -1,11 +1,11 @@
 package solahkay.binar.challenge.service;
 
+import org.springframework.data.domain.Page;
 import solahkay.binar.challenge.entity.Merchant;
 import solahkay.binar.challenge.model.AddProductRequest;
+import solahkay.binar.challenge.model.ProductRequest;
 import solahkay.binar.challenge.model.ProductResponse;
 import solahkay.binar.challenge.model.UpdateProductRequest;
-
-import java.util.List;
 
 public interface ProductService {
 
@@ -15,6 +15,6 @@ public interface ProductService {
 
     void delete(Merchant merchant, String productId);
 
-    List<ProductResponse> getAllProduct();
+    Page<ProductResponse> getAllProduct(ProductRequest productRequest);
 
 }

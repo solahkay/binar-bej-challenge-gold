@@ -1,20 +1,23 @@
 package solahkay.binar.challenge.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import solahkay.binar.challenge.entity.Merchant;
 import solahkay.binar.challenge.entity.Product;
 import solahkay.binar.challenge.exception.ProductNotFoundException;
 import solahkay.binar.challenge.model.AddProductRequest;
+import solahkay.binar.challenge.model.ProductRequest;
 import solahkay.binar.challenge.model.ProductResponse;
 import solahkay.binar.challenge.model.UpdateProductRequest;
 import solahkay.binar.challenge.repository.ProductRepository;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -45,6 +48,8 @@ public class ProductServiceImpl implements ProductService {
 
         productRepository.save(product);
 
+        log.info("Saved product : {}", product.getName());
+
         return toProductResponse(product);
     }
 
@@ -64,6 +69,8 @@ public class ProductServiceImpl implements ProductService {
 
         productRepository.save(product);
 
+        log.info("Updated product : {}", product.getName());
+
         return toProductResponse(product);
     }
 
@@ -76,16 +83,19 @@ public class ProductServiceImpl implements ProductService {
                 ));
 
         productRepository.delete(product);
+
+        log.info("Deleting product with id: {}", productId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponse> getAllProduct() {
-        List<Product> products = productRepository.findAll();
+    public Page<ProductResponse> getAllProduct(ProductRequest productRequest) {
+        int page = productRequest.getPage();
+        int size = productRequest.getSize();
 
-        return products.stream()
-                .map(this::toProductResponse)
-                .collect(Collectors.toList());
+        Page<Product> products = productRepository.findAll(PageRequest.of(page, size));
+
+        return products.map(this::toProductResponse);
     }
 
     private ProductResponse toProductResponse(Product product) {
