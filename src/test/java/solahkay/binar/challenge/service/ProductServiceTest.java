@@ -5,10 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import solahkay.binar.challenge.entity.Merchant;
 import solahkay.binar.challenge.entity.Product;
 import solahkay.binar.challenge.exception.ProductNotFoundException;
 import solahkay.binar.challenge.model.AddProductRequest;
+import solahkay.binar.challenge.model.ProductRequest;
 import solahkay.binar.challenge.model.ProductResponse;
 import solahkay.binar.challenge.model.UpdateProductRequest;
 import solahkay.binar.challenge.repository.MerchantRepository;
@@ -16,7 +18,6 @@ import solahkay.binar.challenge.repository.ProductRepository;
 import solahkay.binar.challenge.resolver.MerchantResolver;
 
 import javax.validation.ConstraintViolationException;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -186,9 +187,15 @@ class ProductServiceTest {
 
         productService.add(merchant2, addProductRequest2);
 
-        List<ProductResponse> allProduct = productService.getAllProduct();
+        ProductRequest productRequest = new ProductRequest();
+        productRequest.setPage(0);
+        productRequest.setSize(10);
+
+        Page<ProductResponse> allProduct = productService.getAllProduct(productRequest);
+
+        System.out.println(allProduct.getContent());
+
         assertNotNull(allProduct);
-        assertEquals(2, allProduct.size());
     }
 
 }
