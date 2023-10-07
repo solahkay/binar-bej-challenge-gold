@@ -1,5 +1,6 @@
 package solahkay.binar.challenge.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import solahkay.binar.challenge.security.BCrypt;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -48,6 +50,8 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         userRepository.save(userRegister);
+
+        log.info("User registered: {}", userRequest.getUsername());
     }
 
     @Override
@@ -64,6 +68,8 @@ public class UserServiceImpl implements UserService {
         }
 
         userRepository.save(user);
+
+        log.info("User updated: {}", user.getUsername());
 
         return UserResponse.builder()
                 .username(user.getUsername())
@@ -84,6 +90,9 @@ public class UserServiceImpl implements UserService {
 
         if (isValid) {
             userRepository.delete(user);
+            log.info("User removed: " + user.getUsername());
+        } else {
+            log.warn("Invalid password for user: " + user.getUsername());
         }
     }
 
