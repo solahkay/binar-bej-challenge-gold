@@ -1,14 +1,20 @@
 package solahkay.binar.challenge.entity.identifier;
 
-import solahkay.binar.challenge.entity.Order;
-import solahkay.binar.challenge.entity.Product;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.Embeddable;
 import java.io.Serializable;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Embeddable
 public class OrderDetailId implements Serializable {
 
-    private Order order;
+    private String order;
 
-    private Product product;
+    private String product;
 
 }
