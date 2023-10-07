@@ -1,5 +1,6 @@
 package solahkay.binar.challenge.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class MerchantServiceImpl implements MerchantService {
 
@@ -45,6 +47,8 @@ public class MerchantServiceImpl implements MerchantService {
                 .build();
 
         merchantRepository.save(merchant);
+
+        log.info("Merchant registered: {}", merchant.getName());
     }
 
     @Override
@@ -53,6 +57,9 @@ public class MerchantServiceImpl implements MerchantService {
         validationService.validate(merchantRequest);
 
         merchant.setOpen(merchantRequest.isOpen());
+
+        log.info("Merchant status updated: name={}, location={}, open={}",
+                merchant.getName(), merchant.getLocation(), merchant.isOpen());
 
         return MerchantResponse.builder()
                 .name(merchant.getName())
