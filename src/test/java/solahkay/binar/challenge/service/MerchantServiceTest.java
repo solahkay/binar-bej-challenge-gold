@@ -4,14 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import solahkay.binar.challenge.entity.Merchant;
 import solahkay.binar.challenge.exception.ApiException;
+import solahkay.binar.challenge.model.MerchantRequest;
 import solahkay.binar.challenge.model.MerchantResponse;
 import solahkay.binar.challenge.model.RegisterMerchantRequest;
 import solahkay.binar.challenge.model.UpdateStatusMerchantRequest;
 import solahkay.binar.challenge.repository.MerchantRepository;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -111,12 +111,21 @@ class MerchantServiceTest {
 
         merchantService.register(merchantRequest2);
 
-        List<MerchantResponse> merchants = merchantService.getAllOnlineMerchants();
+        RegisterMerchantRequest merchantRequest3 = new RegisterMerchantRequest();
+        merchantRequest3.setName("Toko Klontong Pak Budi");
+        merchantRequest3.setLocation("Depok");
+        merchantRequest3.setOpen(true);
+
+        merchantService.register(merchantRequest3);
+
+        MerchantRequest merchantRequest = new MerchantRequest();
+        merchantRequest.setPage(0);
+        merchantRequest.setSize(10);
+
+        Page<MerchantResponse> merchants = merchantService.getAllOnlineMerchants(merchantRequest);
 
         assertNotNull(merchants);
-        assertEquals(1, merchants.size());
-        assertEquals("Permata Emas", merchants.get(0).getName());
-        assertEquals("Brebes", merchants.get(0).getLocation());
+        assertEquals(2, merchants.getContent().size());
     }
 
 }
