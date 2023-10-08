@@ -2,10 +2,14 @@ package solahkay.binar.challenge.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import solahkay.binar.challenge.entity.Merchant;
 import solahkay.binar.challenge.exception.ApiException;
+import solahkay.binar.challenge.model.MerchantRequest;
 import solahkay.binar.challenge.model.MerchantResponse;
 import solahkay.binar.challenge.model.RegisterMerchantRequest;
 import solahkay.binar.challenge.model.UpdateStatusMerchantRequest;
@@ -70,13 +74,17 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MerchantResponse> getAllOnlineMerchants() {
-        List<Merchant> merchants = merchantRepository.findAll();
+    public Page<MerchantResponse> getAllOnlineMerchants(MerchantRequest merchantRequest) {
+        int page = merchantRequest.getPage();
+        int size = merchantRequest.getSize();
 
-        return merchants.stream()
-                .filter(Merchant::isOpen)
+        Page<Merchant> merchants = merchantRepository.findAll(PageRequest.of(page, size));
+
+        List<MerchantResponse> collect = merchants.stream().filter(Merchant::isOpen)
                 .map(this::toMerchantResponse)
                 .collect(Collectors.toList());
+
+        return convertToPage(collect, page, size);
     }
 
     private MerchantResponse toMerchantResponse(Merchant merchant) {
@@ -85,6 +93,16 @@ public class MerchantServiceImpl implements MerchantService {
                 .location(merchant.getLocation())
                 .open(merchant.isOpen())
                 .build();
+    }
+
+    private Page<MerchantResponse> convertToPage(List<MerchantResponse> merchantResponses, int page, int size) {
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, merchantResponses.size());
+
+        List<MerchantResponse> pageContent = merchantResponses
+                .subList(startIndex, endIndex);
+
+        return new PageImpl<>(pageContent, PageRequest.of(page, size), merchantResponses.size());
     }
 
 }

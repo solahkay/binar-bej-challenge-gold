@@ -1,6 +1,8 @@
 package solahkay.binar.challenge.service;
 
+import org.springframework.data.domain.Page;
 import solahkay.binar.challenge.entity.Merchant;
+import solahkay.binar.challenge.model.MerchantRequest;
 import solahkay.binar.challenge.model.MerchantResponse;
 import solahkay.binar.challenge.model.RegisterMerchantRequest;
 import solahkay.binar.challenge.model.UpdateStatusMerchantRequest;
@@ -13,6 +15,6 @@ public interface MerchantService {
 
     MerchantResponse updateStatus(Merchant merchant, UpdateStatusMerchantRequest merchantRequest);
 
-    List<MerchantResponse> getAllOnlineMerchants();
+    Page<MerchantResponse> getAllOnlineMerchants(MerchantRequest merchantRequest);
 
 }
