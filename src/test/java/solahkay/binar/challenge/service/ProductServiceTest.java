@@ -169,7 +169,7 @@ class ProductServiceTest {
         merchant1.setName("Toko Emas Retail");
         merchant2.setName("Toko Dunkin Donats");
         merchantRepository.save(merchant1);
-        merchantRepository.save(merchant2);;
+        merchantRepository.save(merchant2);
 
         AddProductRequest addProductRequest1 = new AddProductRequest();
         addProductRequest1.setName("test");
@@ -193,9 +193,8 @@ class ProductServiceTest {
 
         Page<ProductResponse> allProduct = productService.getAllProduct(productRequest);
 
-        System.out.println(allProduct.getContent());
-
         assertNotNull(allProduct);
+        assertEquals(2, allProduct.getContent().size());
     }
 
 }
