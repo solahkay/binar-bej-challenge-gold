@@ -52,26 +52,3 @@ create table order_details
     foreign key (product_id) references products (id),
     foreign key (order_id) references orders (id)
 );
-
-select *
-from users;
-
-select *
-from products;
-
-delete
-from products;
-
-select *
-from merchants;
-
-select * from orders;
-
-select *
-from order_details;
-
-delete from products
-where sku = 'XIOAMI-XR1P6-46960';
-
-delete from order_details
-where product_id = '84793336-9032-43b9-9f3a-395196019646';
