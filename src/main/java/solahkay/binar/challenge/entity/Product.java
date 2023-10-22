@@ -1,29 +1,26 @@
 package solahkay.binar.challenge.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import solahkay.binar.challenge.enums.ProductStatus;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.LinkedList;
 import java.util.List;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "products")
+@Builder
 @Entity
+@Table(name = "products")
+@ToString(exclude = {"merchant", "orderDetails"})
 public class Product {
 
     @Id
     private String id;
+
+    @Column(unique = true, nullable = false)
+    private String sku;
 
     @Column(nullable = false)
     private String name;
@@ -31,14 +28,18 @@ public class Product {
     @Column(nullable = false)
     private Long price;
 
-    @Column(columnDefinition = "int default 0")
-    private Integer stock;
+    @Column(nullable = false)
+    private Long quantity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProductStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "id_merchant", referencedColumnName = "id")
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     private Merchant merchant;
 
     @OneToMany(mappedBy = "product")
-    private List<OrderDetail> orderDetails;
+    private List<OrderDetail> orderDetails = new LinkedList<>();
 
 }

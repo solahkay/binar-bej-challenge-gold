@@ -1,16 +1,15 @@
 package solahkay.binar.challenge.service;
 
-import solahkay.binar.challenge.entity.Order;
-import solahkay.binar.challenge.entity.User;
+import org.springframework.data.domain.Page;
 import solahkay.binar.challenge.model.CreateOrderRequest;
 import solahkay.binar.challenge.model.OrderResponse;
 
-import java.util.List;
-
 public interface OrderService {
 
-    OrderResponse create(User user, CreateOrderRequest orderRequest);
+    byte[] createOrder(CreateOrderRequest request);
 
-    List<OrderResponse> getAll();
+    OrderResponse getOrder(String orderCode);
+
+    Page<OrderResponse> getAllOrder(String username, int page, int size);
 
 }

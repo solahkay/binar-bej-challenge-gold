@@ -2,24 +2,21 @@ package solahkay.binar.challenge.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import solahkay.binar.challenge.enums.MerchantStatus;
 
-import java.util.List;
+import javax.validation.constraints.NotNull;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MerchantResponse {
+public class UpdateMerchantRequest {
 
-    private String name;
-
-    private String location;
-
+    @NotNull
     private MerchantStatus status;
-
-    private List<ProductResponse> products;
 
 }

@@ -4,32 +4,39 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import solahkay.binar.challenge.entity.identifier.OrderDetailId;
+import solahkay.binar.challenge.entity.identifier.OrderDetailsId;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
+import javax.persistence.Table;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
-@Table(name = "orders_detail")
-@IdClass(OrderDetailId.class)
-public class OrderDetail implements Serializable {
+@Table(name = "order_details")
+public class OrderDetail {
 
-    @Id
+    @EmbeddedId
+    private OrderDetailsId id;
+
     @ManyToOne
-    @JoinColumn(name = "id_order", referencedColumnName = "id")
+    @MapsId("orderId")
+    @JoinColumn(name = "order_id")
     private Order order;
 
-    @Id
     @ManyToOne
-    @JoinColumn(name = "id_product", referencedColumnName = "id")
+    @MapsId("productId")
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private Long quantity;
 
     @Column(name = "total_price", nullable = false)
     private Long totalPrice;

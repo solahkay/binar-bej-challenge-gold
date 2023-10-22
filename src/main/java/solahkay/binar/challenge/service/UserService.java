@@ -1,17 +1,18 @@
 package solahkay.binar.challenge.service;
 
-import solahkay.binar.challenge.entity.User;
+import solahkay.binar.challenge.model.CreateUserRequest;
 import solahkay.binar.challenge.model.DeleteUserRequest;
-import solahkay.binar.challenge.model.RegisterUserRequest;
 import solahkay.binar.challenge.model.UpdateUserRequest;
 import solahkay.binar.challenge.model.UserResponse;
 
 public interface UserService {
 
-    void register(RegisterUserRequest userRequest);
+    void createUser(CreateUserRequest request);
 
-    UserResponse update(User user, UpdateUserRequest userRequest);
+    UserResponse getUser(String username);
 
-    void remove(DeleteUserRequest userRequest);
+    UserResponse updateUser(String username, UpdateUserRequest request);
+
+    void deleteUser(String username, DeleteUserRequest request);
 
 }

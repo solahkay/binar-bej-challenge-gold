@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -14,15 +16,21 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UpdateUserRequest {
+public class CreateProductRequest {
 
-    @Size(max = 40)
-    private String username;
-
-    @Size(max = 150)
+    @NotBlank
+    @Size(max = 255)
     private String name;
 
-    @Size(max = 100)
-    private String password;
+    @NotNull
+    @Min(1)
+    private Long price;
+
+    @NotNull
+    @Min(1)
+    private Long quantity;
+
+    @NotBlank
+    private String merchantName;
 
 }

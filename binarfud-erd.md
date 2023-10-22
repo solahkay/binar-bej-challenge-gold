@@ -5,45 +5,50 @@
 ```mermaid
 erDiagram
     USERS {
-        bigserial id PK
-        varchar username UK
-        varchar name
-        varchar email UK
-        varchar password
+        varchar(100) id PK
+        varchar(40) username UK
+        varchar(150) name
+        varchar(100) email UK
+        varchar(255) password
+        timestamp created_at
+        timestamp updated_at
     }
 
     MERCHANTS {
-        bigserial id PK
-        varchar name UK
-        varchar location
-        boolean open
+        varchar(100) id PK
+        varchar(150) name UK
+        varchar(100) location
+        varchar(50) status
     }
     
     PRODUCTS {
-        String id PK
-        varchar name
+        varchar(100) id PK
+        varchar(100) sku UK
+        varchar(255) name
         bigint price
-        bigserial id_merchant FK
+        bigint quantity
+        varchar(50) status
+        varchar(100) merchant_id FK
     }
     
     ORDERS {
-        String id PK
-        varchar destination_address
-        timestamp order_date
-        boolean completed
-        bigserial id_user FK
+        varchar(100) id PK
+        varchar(100) code UK
+        varchar(500) shipping_address
+        timestamp created_at
+        varchar(50) status
+        varchar(100) user_id FK
     }
     
-    ORDERS_DETAIL {
-        String id_product PK
-        String id_order PK
-        int quantity
+    ORDER_DETAILS {
+        varchar(100) order_id PK
+        varchar(100) product_id PK
+        bigint quantity
         bigint total_price
     }
 
     MERCHANTS ||--|{ PRODUCTS : sells
     USERS ||--o{ ORDERS : places
-    ORDERS ||--|{ ORDERS_DETAIL : contains
-    PRODUCTS ||--|{ ORDERS_DETAIL : contains
-    
+    ORDERS ||--|{ ORDER_DETAILS : contains
+    PRODUCTS ||--|{ ORDER_DETAILS : contains
 ```

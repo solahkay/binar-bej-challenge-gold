@@ -4,24 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import solahkay.binar.challenge.enums.ProductStatus;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductResponse {
+public class OrderDetailResponse {
 
-    private String sku;
+    private String productSku;
 
-    private String name;
-
-    private Long price;
+    private String productName;
 
     private Long quantity;
 
-    private ProductStatus status;
-
-    private String merchantName;
+    private Long totalPrice;
 
 }

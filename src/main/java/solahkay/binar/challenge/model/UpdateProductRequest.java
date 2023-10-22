@@ -1,32 +1,33 @@
 package solahkay.binar.challenge.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class UpdateProductRequest {
 
-    @JsonIgnore
-    @NotBlank(message = "Id can't be blank")
-    private String id;
-
-    @Size(max = 100)
+    @Size(max = 255)
     private String name;
 
-    @Positive(message = "Price must be positive value")
+    @Min(1)
     private Long price;
 
-    @Positive(message = "Stock must be positive value")
-    private Integer stock;
+    @Min(0)
+    private Long quantity;
+
+    @NotBlank
+    @Size(max = 100)
+    private String merchantName;
 
 }

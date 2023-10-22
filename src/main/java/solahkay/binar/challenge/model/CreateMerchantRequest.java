@@ -14,15 +14,14 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UpdateUserRequest {
+public class CreateMerchantRequest {
 
-    @Size(max = 40)
-    private String username;
-
+    @NotBlank
     @Size(max = 150)
     private String name;
 
+    @NotBlank
     @Size(max = 100)
-    private String password;
+    private String location;
 
 }

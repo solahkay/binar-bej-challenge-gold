@@ -2,25 +2,30 @@ package solahkay.binar.challenge.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-import java.util.SortedSet;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class CreateOrderRequest {
 
-    @NotBlank(message = "Destination address can't be blank")
+    @NotBlank
+    private String shippingAddress;
+
+    @NotEmpty
+    private List<OrderDetailRequest> orderDetails;
+
+    @NotBlank
     @Size(max = 100)
-    private String destinationAddress;
-
-    private boolean completed;
-
-    private SortedSet<OrderDetailRequest> orderDetails;
+    private String username;
 
 }

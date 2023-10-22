@@ -5,18 +5,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import solahkay.binar.challenge.entity.Merchant;
-import solahkay.binar.challenge.exception.ApiException;
-import solahkay.binar.challenge.model.MerchantRequest;
+import solahkay.binar.challenge.enums.MerchantStatus;
+import solahkay.binar.challenge.model.CreateMerchantRequest;
 import solahkay.binar.challenge.model.MerchantResponse;
-import solahkay.binar.challenge.model.RegisterMerchantRequest;
-import solahkay.binar.challenge.model.UpdateStatusMerchantRequest;
+import solahkay.binar.challenge.model.ProductResponse;
+import solahkay.binar.challenge.model.UpdateMerchantRequest;
 import solahkay.binar.challenge.repository.MerchantRepository;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,74 +38,73 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     @Transactional
-    public void register(RegisterMerchantRequest merchantRequest) {
-        validationService.validate(merchantRequest);
+    public void createMerchant(CreateMerchantRequest request) {
+        validationService.validate(request);
 
-        if (merchantRepository.existsByName(merchantRequest.getName())) {
-            throw new ApiException("Merchant already exists");
+        if (merchantRepository.existsByName(request.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Merchant already exist");
         }
 
-        Optional<Boolean> open = Optional.of(merchantRequest.isOpen());
-
         Merchant merchant = Merchant.builder()
-                .name(merchantRequest.getName())
-                .location(merchantRequest.getLocation())
-                .open(open.orElse(false))
+                .id(UUID.randomUUID().toString())
+                .name(request.getName())
+                .location(request.getLocation())
+                .status(MerchantStatus.CLOSED)
                 .build();
 
         merchantRepository.save(merchant);
-
-        log.info("Merchant registered: {}", merchant.getName());
-    }
-
-    @Override
-    @Transactional
-    public MerchantResponse updateStatus(Merchant merchant, UpdateStatusMerchantRequest merchantRequest) {
-        validationService.validate(merchantRequest);
-
-        merchant.setOpen(merchantRequest.isOpen());
-
-        log.info("Merchant status updated: name={}, location={}, open={}",
-                merchant.getName(), merchant.getLocation(), merchant.isOpen());
-
-        return MerchantResponse.builder()
-                .name(merchant.getName())
-                .location(merchant.getLocation())
-                .open(merchant.isOpen())
-                .build();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<MerchantResponse> getAllOnlineMerchants(MerchantRequest merchantRequest) {
-        int page = merchantRequest.getPage();
-        int size = merchantRequest.getSize();
+    public MerchantResponse getMerchant(String merchantName) {
+        Merchant merchant = merchantRepository.findByName(merchantName)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Merchant not found"));
 
-        Page<Merchant> merchants = merchantRepository.findAll(PageRequest.of(page, size));
-
-        List<MerchantResponse> collect = merchants.stream().filter(Merchant::isOpen)
-                .map(this::toMerchantResponse)
-                .collect(Collectors.toList());
-
-        return convertToPage(collect, page, size);
+        return toMerchantResponse(merchant);
     }
 
-    private MerchantResponse toMerchantResponse(Merchant merchant) {
+    public static MerchantResponse toMerchantResponse(Merchant merchant) {
+        List<ProductResponse> productResponses = merchant.getProducts().stream()
+                .map(ProductServiceImpl::toProductResponse)
+                .collect(Collectors.toList());
+
         return MerchantResponse.builder()
                 .name(merchant.getName())
                 .location(merchant.getLocation())
-                .open(merchant.isOpen())
+                .status(merchant.getStatus())
+                .products(productResponses)
                 .build();
     }
 
-    private Page<MerchantResponse> convertToPage(List<MerchantResponse> merchantResponses, int page, int size) {
-        int startIndex = page * size;
-        int endIndex = Math.min(startIndex + size, merchantResponses.size());
+    @Override
+    @Transactional
+    public MerchantResponse updateStatusMerchant(String merchantName, UpdateMerchantRequest request) {
+        validationService.validate(request);
 
-        List<MerchantResponse> pageContent = merchantResponses
-                .subList(startIndex, endIndex);
+        Merchant merchant = merchantRepository.findByName(merchantName)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Merchant not found"));
 
-        return new PageImpl<>(pageContent, PageRequest.of(page, size), merchantResponses.size());
+        merchant.setStatus(request.getStatus());
+        merchantRepository.save(merchant);
+
+        return toMerchantResponse(merchant);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MerchantResponse> getAllOpenMerchant(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Merchant> merchants = merchantRepository.findAllByStatus(
+                MerchantStatus.OPEN,
+                pageable
+        );
+
+        List<MerchantResponse> merchantResponses = merchants.getContent().stream()
+                .map(MerchantServiceImpl::toMerchantResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(merchantResponses, pageable, merchants.getTotalElements());
     }
 
 }

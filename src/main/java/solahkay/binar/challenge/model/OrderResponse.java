@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import solahkay.binar.challenge.enums.OrderStatus;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -14,12 +15,18 @@ import java.time.LocalDateTime;
 @Builder
 public class OrderResponse {
 
-    private String id;
+    private String code;
 
-    private String destinationAddress;
+    private String username;
 
-    private LocalDateTime orderDate;
+    private String shippingAddress;
 
-    private boolean completed;
+    private LocalDateTime createdAt;
+
+    private OrderStatus status;
+
+    private List<OrderDetailResponse> details;
+
+    private Long totalPrice;
 
 }

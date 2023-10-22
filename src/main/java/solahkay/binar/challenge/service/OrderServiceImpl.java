@@ -1,105 +1,265 @@
 package solahkay.binar.challenge.service;
 
+import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import solahkay.binar.challenge.entity.Order;
 import solahkay.binar.challenge.entity.OrderDetail;
 import solahkay.binar.challenge.entity.Product;
 import solahkay.binar.challenge.entity.User;
-import solahkay.binar.challenge.exception.ProductNotFoundException;
+import solahkay.binar.challenge.entity.identifier.OrderDetailsId;
+import solahkay.binar.challenge.enums.OrderStatus;
+import solahkay.binar.challenge.generator.OrderCodeGenerator;
 import solahkay.binar.challenge.model.CreateOrderRequest;
+import solahkay.binar.challenge.model.InvoiceModel;
 import solahkay.binar.challenge.model.OrderDetailRequest;
+import solahkay.binar.challenge.model.OrderDetailResponse;
 import solahkay.binar.challenge.model.OrderResponse;
+import solahkay.binar.challenge.repository.OrderDetailRepository;
 import solahkay.binar.challenge.repository.OrderRepository;
 import solahkay.binar.challenge.repository.ProductRepository;
+import solahkay.binar.challenge.repository.UserRepository;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl implements OrderService{
 
     private final OrderRepository orderRepository;
 
+    private final UserRepository userRepository;
+
     private final ProductRepository productRepository;
+
+    private final OrderDetailRepository orderDetailRepository;
 
     private final ValidationService validationService;
 
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository,
+                            UserRepository userRepository,
                             ProductRepository productRepository,
+                            OrderDetailRepository orderDetailRepository,
                             ValidationService validationService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.orderDetailRepository = orderDetailRepository;
         this.validationService = validationService;
     }
 
+
     @Override
     @Transactional
-    public OrderResponse create(User user, CreateOrderRequest orderRequest) {
-        validationService.validate(orderRequest);
+    public byte[] createOrder(CreateOrderRequest request) {
+        validationService.validate(request);
+
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        DateTimeFormatter formatterForDatabase = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedLocalDateTime = LocalDateTime.now().format(formatterForDatabase);
+        LocalDateTime localDateTime = LocalDateTime.parse(formattedLocalDateTime, formatterForDatabase);
 
         Order order = Order.builder()
                 .id(UUID.randomUUID().toString())
-                .destinationAddress(orderRequest.getDestinationAddress())
-                .orderDate(LocalDateTime.now())
-                .completed(false)
+                .code(OrderCodeGenerator.generateOrderCode())
+                .shippingAddress(request.getShippingAddress())
+                .createdAt(localDateTime)
+                .status(OrderStatus.PROCESSING)
                 .user(user)
                 .build();
 
-        List<OrderDetail> orderDetails = new LinkedList<>();
-        addOrderToOrderDetail(orderRequest, order, orderDetails);
-        order.setOrderDetails(orderDetails);
-
         orderRepository.save(order);
+
+        List<OrderDetailRequest> orderDetailsRequest = request.getOrderDetails();
+        List<OrderDetailResponse> orderDetailResponses = new LinkedList<>();
+        List<InvoiceModel> invoiceModels = new LinkedList<>();
+        List<InvoiceModel> productInvoiceModels = new LinkedList<>();
+
+        insertToOrderDetail(orderDetailsRequest, order, orderDetailResponses, productInvoiceModels);
+
+        long totalPrice = orderDetailResponses.stream()
+                .mapToLong(OrderDetailResponse::getTotalPrice)
+                .sum();
+
+        long quantityTotal = orderDetailResponses.stream()
+                .mapToLong(OrderDetailResponse::getQuantity)
+                .sum();
+
+        DateTimeFormatter formatterForInvoice = DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm:ss");
+        String orderTime = order.getCreatedAt().format(formatterForInvoice);
+
+        InvoiceModel invoiceModel = InvoiceModel.builder()
+                .username(user.getUsername())
+                .address(order.getShippingAddress())
+                .status(order.getStatus().name())
+                .totalPrice(totalPrice)
+                .orderTime(orderTime)
+                .orderCode(order.getCode())
+                .quantityTotal(quantityTotal)
+                .build();
+
+        invoiceModels.add(invoiceModel);
+        invoiceModels.addAll(productInvoiceModels);
+
+        try {
+            return generateInvoice(invoiceModels);
+        } catch (IOException | JRException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    private void insertToOrderDetail(List<OrderDetailRequest> orderDetailsRequest,
+                                     Order order,
+                                     List<OrderDetailResponse> orderDetailResponses,
+                                     List<InvoiceModel> productInvoiceModels) {
+        orderDetailsRequest.forEach(orderDetailRequest -> {
+            Product product = productRepository.findBySku(orderDetailRequest.getProductSku())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+            if (product.getQuantity() < orderDetailRequest.getQuantity()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not available");
+            }
+
+            OrderDetailsId id = new OrderDetailsId();
+            id.setOrderId(order.getId());
+            id.setProductId(product.getId());
+
+            OrderDetail orderDetail = OrderDetail.builder()
+                    .id(id)
+                    .quantity(orderDetailRequest.getQuantity())
+                    .totalPrice(product.getPrice() * orderDetailRequest.getQuantity())
+                    .order(order)
+                    .product(product)
+                    .build();
+
+            orderDetailRepository.save(orderDetail);
+
+            long quantity = product.getQuantity() - orderDetailRequest.getQuantity();
+            product.setQuantity(quantity);
+            productRepository.save(product);
+
+            OrderDetailResponse orderDetailResponse = toOrderDetailResponse(orderDetail);
+            orderDetailResponses.add(orderDetailResponse);
+
+            toInvoiceModel(productInvoiceModels, orderDetailRequest, product);
+        });
+    }
+
+    private static void toInvoiceModel(List<InvoiceModel> productInvoiceModels,
+                                       OrderDetailRequest orderDetailRequest,
+                                       Product product) {
+        InvoiceModel productInvoiceModel = InvoiceModel.builder()
+                .sku(product.getSku())
+                .productName(product.getName())
+                .merchantName(product.getMerchant().getName())
+                .price(product.getPrice())
+                .quantity(orderDetailRequest.getQuantity())
+                .build();
+
+        productInvoiceModels.add(productInvoiceModel);
+    }
+
+    private static OrderDetailResponse toOrderDetailResponse(OrderDetail orderDetail) {
+        return OrderDetailResponse.builder()
+                .productSku(orderDetail.getProduct().getSku())
+                .productName(orderDetail.getProduct().getName())
+                .quantity(orderDetail.getQuantity())
+                .totalPrice(orderDetail.getQuantity() * orderDetail.getProduct().getPrice())
+                .build();
+    }
+
+    private byte[] generateInvoice(List<InvoiceModel> invoiceModels) throws IOException, JRException {
+        try {
+            InputStream reportStream = getClass().getResourceAsStream("/invoice.jrxml");
+            JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
+
+            byte[] report = buildReport(invoiceModels, jasperReport);
+
+            if (Objects.nonNull(reportStream)) {
+                reportStream.close();
+            }
+
+            return report;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    private static byte[] buildReport(List<InvoiceModel> invoiceModels, JasperReport jasperReport) throws JRException {
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(invoiceModels);
+        Map<String, Object> parameter = new HashMap<>();
+        parameter.put("author", "Solah");
+
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameter, dataSource);
+        return JasperExportManager.exportReportToPdf(jasperPrint);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderResponse getOrder(String orderCode) {
+        Order order = orderRepository.findByCode(orderCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
 
         return toOrderResponse(order);
     }
 
-    private void addOrderToOrderDetail(CreateOrderRequest orderRequest, Order order, List<OrderDetail> orderDetails) {
-        orderRequest.getOrderDetails()
-                .forEach(detailRequest -> {
-                    Product product = productRepository.findById(detailRequest.getProductId())
-                            .orElseThrow(() -> new ProductNotFoundException(
-                                    "Product with id " + detailRequest.getProductId() + " not found"
-                            ));
-
-                    OrderDetail orderDetail = toOrderDetail(detailRequest, order, product);
-
-                    orderDetails.add(orderDetail);
-                });
-    }
-
-    private OrderDetail toOrderDetail(OrderDetailRequest detailRequest, Order order, Product product) {
-        return OrderDetail.builder()
-                .order(order)
-                .product(product)
-                .quantity(detailRequest.getQuantity())
-                .totalPrice(product.getPrice() * detailRequest.getQuantity())
+    private static OrderResponse toOrderResponse(Order order) {
+        List<OrderDetail> orderDetails = order.getOrderDetails();
+        return OrderResponse.builder()
+                .code(order.getCode())
+                .username(order.getUser().getUsername())
+                .shippingAddress(order.getShippingAddress())
+                .createdAt(order.getCreatedAt())
+                .status(order.getStatus())
+                .details(orderDetails.stream()
+                        .map(OrderServiceImpl::toOrderDetailResponse)
+                        .collect(Collectors.toList())
+                )
                 .build();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderResponse> getAll() {
-        List<Order> orders = orderRepository.findAll();
+    public Page<OrderResponse> getAllOrder(String username, int page, int size) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        return orders.stream()
-                .map(this::toOrderResponse)
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Order> orders = orderRepository.findAllByUser(user, pageable);
+
+        List<OrderResponse> orderResponses = orders.getContent().stream()
+                .map(OrderServiceImpl::toOrderResponse)
                 .collect(Collectors.toList());
-    }
 
-    private OrderResponse toOrderResponse(Order order) {
-        return OrderResponse.builder()
-                .id(order.getId())
-                .destinationAddress(order.getDestinationAddress())
-                .orderDate(order.getOrderDate())
-                .completed(order.isCompleted())
-                .build();
+        return new PageImpl<>(orderResponses, pageable, orders.getTotalElements());
     }
 
 }

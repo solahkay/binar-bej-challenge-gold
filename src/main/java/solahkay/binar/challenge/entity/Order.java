@@ -4,21 +4,25 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import solahkay.binar.challenge.enums.OrderStatus;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -26,20 +30,24 @@ public class Order {
     @Id
     private String id;
 
-    @Column(name = "destination_address", nullable = false)
-    private String destinationAddress;
+    @Column(unique = true, nullable = false)
+    private String code;
 
-    @Column(name = "order_date", columnDefinition = "timestamp default CURRENT_TIMESTAMP")
-    private LocalDateTime orderDate;
+    @Column(name = "shipping_address", nullable = false)
+    private String shippingAddress;
 
-    @Column(columnDefinition = "boolean default false")
-    private boolean completed;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "id_user", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "order")
-    private List<OrderDetail> orderDetails;
+    private List<OrderDetail> orderDetails = new LinkedList<>();
 
 }
