@@ -172,11 +172,11 @@ public class OrderServiceImpl implements OrderService{
             OrderDetailResponse orderDetailResponse = toOrderDetailResponse(orderDetail);
             orderDetailResponses.add(orderDetailResponse);
 
-            toProductInvoiceModel(productInvoiceModels, orderDetailRequest, product);
+            insertToInvoiceModels(productInvoiceModels, orderDetailRequest, product);
         });
     }
 
-    private static void toProductInvoiceModel(List<InvoiceModel> productInvoiceModels,
+    private static void insertToInvoiceModels(List<InvoiceModel> productInvoiceModels,
                                               OrderDetailRequest orderDetailRequest,
                                               Product product) {
         InvoiceModel productInvoiceModel = InvoiceModel.builder()
