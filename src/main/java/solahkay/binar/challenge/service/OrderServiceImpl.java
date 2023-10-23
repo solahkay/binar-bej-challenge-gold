@@ -22,6 +22,7 @@ import solahkay.binar.challenge.entity.Product;
 import solahkay.binar.challenge.entity.User;
 import solahkay.binar.challenge.entity.identifier.OrderDetailId;
 import solahkay.binar.challenge.enums.OrderStatus;
+import solahkay.binar.challenge.enums.ProductStatus;
 import solahkay.binar.challenge.generator.OrderCodeGenerator;
 import solahkay.binar.challenge.model.CreateOrderRequest;
 import solahkay.binar.challenge.model.InvoiceModel;
@@ -142,7 +143,9 @@ public class OrderServiceImpl implements OrderService{
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
             if (product.getQuantity() < orderDetailRequest.getQuantity()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not available");
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Product quantity is less than order quantity");
             }
 
             OrderDetailId id = new OrderDetailId();
@@ -160,6 +163,9 @@ public class OrderServiceImpl implements OrderService{
             orderDetailRepository.save(orderDetail);
 
             long quantity = product.getQuantity() - orderDetailRequest.getQuantity();
+            if (quantity == 0) {
+                product.setStatus(ProductStatus.OUT_OF_STOCK);
+            }
             product.setQuantity(quantity);
             productRepository.save(product);
 
