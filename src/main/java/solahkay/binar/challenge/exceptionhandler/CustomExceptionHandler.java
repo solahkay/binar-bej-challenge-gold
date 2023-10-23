@@ -34,13 +34,13 @@ public class CustomExceptionHandler {
     }
 
     @ExceptionHandler(InvalidFormatException.class)
-    public ResponseEntity<WebResponse<String>> invalidFormatException(InvalidFormatException exception) {
+    public ResponseEntity<WebResponse<String>> invalidFormatException() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(WebResponse.<String>builder().errors("Wrong format data").build());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<WebResponse<String>> httpMessageNotReadableException(HttpMessageNotReadableException exception) {
+    public ResponseEntity<WebResponse<String>> httpMessageNotReadableException() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(WebResponse.<String>builder().errors("Wrong format data").build());
     }

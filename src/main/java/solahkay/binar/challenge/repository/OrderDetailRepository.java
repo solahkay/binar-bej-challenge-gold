@@ -5,15 +5,12 @@ import org.springframework.stereotype.Repository;
 import solahkay.binar.challenge.entity.Order;
 import solahkay.binar.challenge.entity.OrderDetail;
 import solahkay.binar.challenge.entity.Product;
-import solahkay.binar.challenge.entity.User;
-import solahkay.binar.challenge.entity.identifier.OrderDetailsId;
+import solahkay.binar.challenge.entity.identifier.OrderDetailId;
 
 @Repository
-public interface OrderDetailRepository extends JpaRepository<OrderDetail, OrderDetailsId> {
+public interface OrderDetailRepository extends JpaRepository<OrderDetail, OrderDetailId> {
 
     void deleteByProduct(Product product);
-
-    void deleteByOrder(Order order);
 
     void deleteAllByOrder(Order order);
 

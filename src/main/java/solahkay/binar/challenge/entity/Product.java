@@ -1,6 +1,10 @@
 package solahkay.binar.challenge.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import solahkay.binar.challenge.enums.ProductStatus;
 
 import javax.persistence.*;

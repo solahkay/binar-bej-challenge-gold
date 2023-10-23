@@ -1,6 +1,5 @@
 package solahkay.binar.challenge.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,9 +18,11 @@ import solahkay.binar.challenge.security.BCrypt;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
-@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -68,7 +69,6 @@ public class UserServiceImpl implements UserService {
                 .password(BCrypt.hashpw(request.getPassword(), BCrypt.gensalt()))
                 .createdAt(localDateTime)
                 .updatedAt(localDateTime)
-                .orders(new LinkedList<>())
                 .build();
 
         userRepository.save(user);

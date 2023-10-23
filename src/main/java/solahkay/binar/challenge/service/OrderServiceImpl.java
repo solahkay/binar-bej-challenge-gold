@@ -1,6 +1,5 @@
 package solahkay.binar.challenge.service;
 
-import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -21,7 +20,7 @@ import solahkay.binar.challenge.entity.Order;
 import solahkay.binar.challenge.entity.OrderDetail;
 import solahkay.binar.challenge.entity.Product;
 import solahkay.binar.challenge.entity.User;
-import solahkay.binar.challenge.entity.identifier.OrderDetailsId;
+import solahkay.binar.challenge.entity.identifier.OrderDetailId;
 import solahkay.binar.challenge.enums.OrderStatus;
 import solahkay.binar.challenge.generator.OrderCodeGenerator;
 import solahkay.binar.challenge.model.CreateOrderRequest;
@@ -46,7 +45,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 public class OrderServiceImpl implements OrderService{
 
@@ -147,7 +145,7 @@ public class OrderServiceImpl implements OrderService{
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not available");
             }
 
-            OrderDetailsId id = new OrderDetailsId();
+            OrderDetailId id = new OrderDetailId();
             id.setOrderId(order.getId());
             id.setProductId(product.getId());
 
@@ -168,13 +166,13 @@ public class OrderServiceImpl implements OrderService{
             OrderDetailResponse orderDetailResponse = toOrderDetailResponse(orderDetail);
             orderDetailResponses.add(orderDetailResponse);
 
-            toInvoiceModel(productInvoiceModels, orderDetailRequest, product);
+            toProductInvoiceModel(productInvoiceModels, orderDetailRequest, product);
         });
     }
 
-    private static void toInvoiceModel(List<InvoiceModel> productInvoiceModels,
-                                       OrderDetailRequest orderDetailRequest,
-                                       Product product) {
+    private static void toProductInvoiceModel(List<InvoiceModel> productInvoiceModels,
+                                              OrderDetailRequest orderDetailRequest,
+                                              Product product) {
         InvoiceModel productInvoiceModel = InvoiceModel.builder()
                 .sku(product.getSku())
                 .productName(product.getName())

@@ -51,7 +51,7 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<UserResponse> updateUser(@PathVariable("username") String username,
-                                  @RequestBody UpdateUserRequest request) {
+                                                @RequestBody UpdateUserRequest request) {
         UserResponse userResponse = userService.updateUser(username, request);
         return WebResponse.<UserResponse>builder().data(userResponse).build();
     }

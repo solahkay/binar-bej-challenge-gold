@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import solahkay.binar.challenge.entity.identifier.OrderDetailsId;
+import solahkay.binar.challenge.entity.identifier.OrderDetailId;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -23,7 +23,7 @@ import javax.persistence.Table;
 public class OrderDetail {
 
     @EmbeddedId
-    private OrderDetailsId id;
+    private OrderDetailId id;
 
     @ManyToOne
     @MapsId("orderId")

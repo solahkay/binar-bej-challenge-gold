@@ -18,9 +18,7 @@ public class ProductSkuGenerator {
         for (String split : productNameSplit) {
             productNameInitialBuilder.append(split.charAt(0));
         }
-
         String productNameInitial = productNameInitialBuilder.toString().toUpperCase();
-
         String nanoTime = String.valueOf(time.getNano());
 
         return String.join(
