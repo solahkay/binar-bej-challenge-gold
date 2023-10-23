@@ -206,7 +206,7 @@ public class OrderServiceImpl implements OrderService{
 
             return report;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error!");
         }
     }
 
