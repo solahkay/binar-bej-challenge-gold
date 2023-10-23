@@ -129,7 +129,7 @@ public class OrderServiceImpl implements OrderService{
         try {
             return generateInvoice(invoiceModels);
         } catch (IOException | JRException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error!");
         }
     }
 
