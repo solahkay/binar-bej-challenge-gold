@@ -17,6 +17,8 @@ public class OrderDetailResponse {
 
     private Long quantity;
 
+    private Long price;
+
     private Long totalPrice;
 
 }

@@ -29,4 +29,6 @@ public class OrderResponse {
 
     private Long totalPrice;
 
+    private Long totalQuantity;
+
 }

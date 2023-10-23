@@ -103,13 +103,9 @@ public class OrderServiceImpl implements OrderService{
 
         insertToOrderDetail(orderDetailsRequest, order, orderDetailResponses, productInvoiceModels);
 
-        long totalPrice = orderDetailResponses.stream()
-                .mapToLong(OrderDetailResponse::getTotalPrice)
-                .sum();
+        long totalPrice = getTotalPriceFromOrderDetail(orderDetailResponses);
 
-        long quantityTotal = orderDetailResponses.stream()
-                .mapToLong(OrderDetailResponse::getQuantity)
-                .sum();
+        long totalQuantity = getTotalQuantityFromOrderDetail(orderDetailResponses);
 
         DateTimeFormatter formatterForInvoice = DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm:ss");
         String orderTime = order.getCreatedAt().format(formatterForInvoice);
@@ -121,7 +117,7 @@ public class OrderServiceImpl implements OrderService{
                 .totalPrice(totalPrice)
                 .orderTime(orderTime)
                 .orderCode(order.getCode())
-                .quantityTotal(quantityTotal)
+                .quantityTotal(totalQuantity)
                 .build();
 
         invoiceModels.add(invoiceModel);
@@ -132,6 +128,18 @@ public class OrderServiceImpl implements OrderService{
         } catch (IOException | JRException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error!");
         }
+    }
+
+    private static long getTotalQuantityFromOrderDetail(List<OrderDetailResponse> orderDetailResponses) {
+        return orderDetailResponses.stream()
+                .mapToLong(OrderDetailResponse::getQuantity)
+                .sum();
+    }
+
+    private static long getTotalPriceFromOrderDetail(List<OrderDetailResponse> orderDetailResponses) {
+        return orderDetailResponses.stream()
+                .mapToLong(OrderDetailResponse::getTotalPrice)
+                .sum();
     }
 
     private void insertToOrderDetail(List<OrderDetailRequest> orderDetailsRequest,
@@ -197,6 +205,7 @@ public class OrderServiceImpl implements OrderService{
                 .productSku(product.getSku())
                 .productName(product.getName())
                 .quantity(quantity)
+                .price(product.getPrice())
                 .totalPrice(quantity * product.getPrice())
                 .build();
     }
@@ -238,16 +247,18 @@ public class OrderServiceImpl implements OrderService{
 
     private static OrderResponse toOrderResponse(Order order) {
         List<OrderDetail> orderDetails = order.getOrderDetails();
+        List<OrderDetailResponse> orderDetailResponses = orderDetails.stream()
+                .map(OrderServiceImpl::toOrderDetailResponse)
+                .collect(Collectors.toList());
         return OrderResponse.builder()
                 .code(order.getCode())
                 .username(order.getUser().getUsername())
                 .shippingAddress(order.getShippingAddress())
                 .createdAt(order.getCreatedAt())
                 .status(order.getStatus())
-                .details(orderDetails.stream()
-                        .map(OrderServiceImpl::toOrderDetailResponse)
-                        .collect(Collectors.toList())
-                )
+                .details(orderDetailResponses)
+                .totalPrice(getTotalPriceFromOrderDetail(orderDetailResponses))
+                .totalQuantity(getTotalQuantityFromOrderDetail(orderDetailResponses))
                 .build();
     }
 
