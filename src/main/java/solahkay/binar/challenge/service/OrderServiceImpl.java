@@ -172,30 +172,32 @@ public class OrderServiceImpl implements OrderService{
             OrderDetailResponse orderDetailResponse = toOrderDetailResponse(orderDetail);
             orderDetailResponses.add(orderDetailResponse);
 
-            insertToInvoiceModels(productInvoiceModels, orderDetailRequest, product);
+            insertOrderDetailToInvoiceModels(productInvoiceModels, orderDetail);
         });
     }
 
-    private static void insertToInvoiceModels(List<InvoiceModel> productInvoiceModels,
-                                              OrderDetailRequest orderDetailRequest,
-                                              Product product) {
+    private static void insertOrderDetailToInvoiceModels(List<InvoiceModel> productInvoiceModels,
+                                                         OrderDetail orderDetail) {
+        Product product = orderDetail.getProduct();
         InvoiceModel productInvoiceModel = InvoiceModel.builder()
                 .sku(product.getSku())
                 .productName(product.getName())
                 .merchantName(product.getMerchant().getName())
                 .price(product.getPrice())
-                .quantity(orderDetailRequest.getQuantity())
+                .quantity(orderDetail.getQuantity())
                 .build();
 
         productInvoiceModels.add(productInvoiceModel);
     }
 
     private static OrderDetailResponse toOrderDetailResponse(OrderDetail orderDetail) {
+        Product product = orderDetail.getProduct();
+        Long quantity = orderDetail.getQuantity();
         return OrderDetailResponse.builder()
-                .productSku(orderDetail.getProduct().getSku())
-                .productName(orderDetail.getProduct().getName())
-                .quantity(orderDetail.getQuantity())
-                .totalPrice(orderDetail.getQuantity() * orderDetail.getProduct().getPrice())
+                .productSku(product.getSku())
+                .productName(product.getName())
+                .quantity(quantity)
+                .totalPrice(quantity * product.getPrice())
                 .build();
     }
 
