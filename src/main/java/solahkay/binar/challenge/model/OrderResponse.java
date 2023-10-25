@@ -21,7 +21,7 @@ public class OrderResponse {
 
     private String shippingAddress;
 
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     private OrderStatus status;
 

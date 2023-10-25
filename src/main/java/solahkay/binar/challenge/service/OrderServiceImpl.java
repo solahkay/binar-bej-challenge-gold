@@ -59,6 +59,8 @@ public class OrderServiceImpl implements OrderService{
 
     private final ValidationService validationService;
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository,
                             UserRepository userRepository,
@@ -81,9 +83,8 @@ public class OrderServiceImpl implements OrderService{
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        DateTimeFormatter formatterForDatabase = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formattedLocalDateTime = LocalDateTime.now().format(formatterForDatabase);
-        LocalDateTime localDateTime = LocalDateTime.parse(formattedLocalDateTime, formatterForDatabase);
+        String formattedLocalDateTime = LocalDateTime.now().format(FORMATTER);
+        LocalDateTime localDateTime = LocalDateTime.parse(formattedLocalDateTime, FORMATTER);
 
         Order order = Order.builder()
                 .id(UUID.randomUUID().toString())
@@ -250,11 +251,12 @@ public class OrderServiceImpl implements OrderService{
         List<OrderDetailResponse> orderDetailResponses = orderDetails.stream()
                 .map(OrderServiceImpl::toOrderDetailResponse)
                 .collect(Collectors.toList());
+
         return OrderResponse.builder()
                 .code(order.getCode())
                 .username(order.getUser().getUsername())
                 .shippingAddress(order.getShippingAddress())
-                .createdAt(order.getCreatedAt())
+                .createdAt(order.getCreatedAt().format(FORMATTER))
                 .status(order.getStatus())
                 .details(orderDetailResponses)
                 .totalPrice(getTotalPriceFromOrderDetail(orderDetailResponses))
