@@ -1,9 +1,9 @@
-# Binar BEJ Challenge 5
+# Binar BEJ Challenge 6
 
 ![Static Badge](https://img.shields.io/badge/status-uwu-brightgreen)
 
 Independent Study batch 5 Binar Academy - Backend Java
-Challenge 5 assignment - BinarFud
+Challenge 6 assignment - BinarFud
 
 ## Disclaimer
 This is not a real-world project; this project is only for educational purposes.
@@ -27,6 +27,9 @@ This is not a real-world project; this project is only for educational purposes.
 - Invoice Bill PDF
 - Get order
 - Show all order
+- authentication
+- authorization
+- JWT
 
 ## 📥 Getting Started
 
@@ -48,19 +51,19 @@ change the directory to the root of the project:
 cd binar-bej-challenge-gold
 ```
 
-create branch `challenge_5`:
+create branch `challenge_6`:
 ```git
-git branch challenge_5
+git branch challenge_6
 ```
 
-switch to branch `challenge_5`:
+switch to branch `challenge_6`:
 ```git
-git switch challenge_5
+git switch challenge_6
 ```
 
 don't forget to pull the code in remote repository:
 ```git
-git pull origin challenge_5
+git pull origin challenge_6
 ```
 
 and then the project are ready to use!
