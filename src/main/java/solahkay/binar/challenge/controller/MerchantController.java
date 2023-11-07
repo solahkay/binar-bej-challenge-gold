@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import solahkay.binar.challenge.model.CreateMerchantRequest;
 import solahkay.binar.challenge.model.MerchantResponse;
 import solahkay.binar.challenge.model.PagingResponse;
+import solahkay.binar.challenge.model.RegisterMerchantRequest;
+import solahkay.binar.challenge.model.TokenResponse;
 import solahkay.binar.challenge.model.UpdateMerchantRequest;
 import solahkay.binar.challenge.model.WebResponse;
 import solahkay.binar.challenge.service.MerchantService;
@@ -22,6 +24,7 @@ import solahkay.binar.challenge.service.MerchantService;
 import java.util.List;
 
 @RestController
+@RequestMapping("api/v1/merchants")
 public class MerchantController {
 
     private final MerchantService merchantService;
@@ -32,38 +35,38 @@ public class MerchantController {
     }
 
     @PostMapping(
-            path = "/api/v1/merchants",
+            path = "register",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ResponseStatus(HttpStatus.CREATED)
-    public WebResponse<String> createMerchant(@RequestBody CreateMerchantRequest request) {
-        merchantService.createMerchant(request);
-        return WebResponse.<String>builder().data("OK").build();
+    public WebResponse<TokenResponse> registerMerchant(@RequestBody RegisterMerchantRequest request) {
+        TokenResponse tokenResponse = merchantService.registerMerchant(request);
+        return WebResponse.<TokenResponse>builder().data(tokenResponse).build();
     }
 
     @GetMapping(
-            path = "/api/v1/merchants/{merchantName}",
+            path = "{username}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<MerchantResponse> getMerchant(@PathVariable("merchantName") String merchantName) {
-        MerchantResponse merchantResponse = merchantService.getMerchant(merchantName);
+    public WebResponse<MerchantResponse> getMerchant(@PathVariable("username") String merchantUsername) {
+        MerchantResponse merchantResponse = merchantService.getMerchant(merchantUsername);
         return WebResponse.<MerchantResponse>builder().data(merchantResponse).build();
     }
 
     @PatchMapping(
-            path = "/api/v1/merchants/{merchantName}",
+            path = "{username}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<MerchantResponse> updateStatusMerchant(@PathVariable("merchantName") String merchantName,
+    public WebResponse<MerchantResponse> updateStatusMerchant(@PathVariable("username") String merchantUsername,
                                                               @RequestBody UpdateMerchantRequest request) {
-        MerchantResponse merchantResponse = merchantService.updateStatusMerchant(merchantName, request);
+        MerchantResponse merchantResponse = merchantService.updateStatusMerchant(merchantUsername, request);
         return WebResponse.<MerchantResponse>builder().data(merchantResponse).build();
     }
 
     @GetMapping(
-            path = "/api/v1/merchants/online",
+            path = "online",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<List<MerchantResponse>> getAllOpenMerchant(

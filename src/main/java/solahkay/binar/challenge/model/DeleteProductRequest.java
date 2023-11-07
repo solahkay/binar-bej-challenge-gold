@@ -18,6 +18,6 @@ public class DeleteProductRequest {
 
     @NotBlank
     @Size(max = 100)
-    private String merchantName;
+    private String merchantUsername;
 
 }

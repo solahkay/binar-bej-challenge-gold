@@ -14,6 +14,8 @@ import java.util.List;
 @Builder
 public class MerchantResponse {
 
+    private String username;
+
     private String name;
 
     private String location;

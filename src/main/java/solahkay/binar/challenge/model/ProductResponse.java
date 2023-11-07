@@ -22,6 +22,6 @@ public class ProductResponse {
 
     private ProductStatus status;
 
-    private String merchantName;
+    private String merchantUsername;
 
 }

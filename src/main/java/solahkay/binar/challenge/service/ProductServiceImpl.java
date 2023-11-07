@@ -23,7 +23,6 @@ import solahkay.binar.challenge.repository.ProductRepository;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
     public void createProduct(CreateProductRequest request) {
         validationService.validate(request);
 
-        Merchant merchant = merchantRepository.findByName(request.getMerchantName())
+        Merchant merchant = merchantRepository.findByUsername(request.getMerchantUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, MERCHANT_NOT_FOUND_MESSAGE
                 ));
 
@@ -67,7 +66,6 @@ public class ProductServiceImpl implements ProductService {
                 ProductStatus.OUT_OF_STOCK;
 
         Product product = Product.builder()
-                .id(UUID.randomUUID().toString())
                 .sku(ProductSkuGenerator.generate(merchant, request.getName()))
                 .name(request.getName())
                 .price(request.getPrice())
@@ -95,7 +93,7 @@ public class ProductServiceImpl implements ProductService {
                 .price(product.getPrice())
                 .quantity(product.getQuantity())
                 .status(product.getStatus())
-                .merchantName(product.getMerchant().getName())
+                .merchantUsername(product.getMerchant().getUsername())
                 .build();
     }
 
@@ -104,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse updateProduct(String productSku, UpdateProductRequest request) {
         validationService.validate(request);
 
-        Merchant merchant = merchantRepository.findByName(request.getMerchantName())
+        Merchant merchant = merchantRepository.findByUsername(request.getMerchantUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, MERCHANT_NOT_FOUND_MESSAGE
                 ));
 
@@ -137,7 +135,7 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(String productSku, DeleteProductRequest request) {
         validationService.validate(request);
 
-        Merchant merchant = merchantRepository.findByName(request.getMerchantName())
+        Merchant merchant = merchantRepository.findByUsername(request.getMerchantUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, MERCHANT_NOT_FOUND_MESSAGE
                 ));
 

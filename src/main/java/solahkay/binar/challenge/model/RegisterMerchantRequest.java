@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -15,22 +14,22 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CreateUserRequest {
+public class RegisterMerchantRequest {
 
     @NotBlank
     @Size(max = 40)
     private String username;
 
+    @NotBlank
     @Size(max = 150)
     private String name;
 
-    @Email
     @NotBlank
     @Size(max = 100)
-    private String email;
+    private String location;
 
     @NotBlank
-    @Size(max = 100)
-    private String password;
+    @Size(max = 40)
+    private String userUsername;
 
 }

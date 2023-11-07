@@ -1,17 +1,18 @@
 package solahkay.binar.challenge.service;
 
 import org.springframework.data.domain.Page;
-import solahkay.binar.challenge.model.CreateMerchantRequest;
+import solahkay.binar.challenge.model.RegisterMerchantRequest;
 import solahkay.binar.challenge.model.MerchantResponse;
+import solahkay.binar.challenge.model.TokenResponse;
 import solahkay.binar.challenge.model.UpdateMerchantRequest;
 
 public interface MerchantService {
 
-    void createMerchant(CreateMerchantRequest request);
+    TokenResponse registerMerchant(RegisterMerchantRequest request);
 
-    MerchantResponse getMerchant(String merchantName);
+    MerchantResponse getMerchant(String merchantUsername);
 
-    MerchantResponse updateStatusMerchant(String merchantName, UpdateMerchantRequest request);
+    MerchantResponse updateStatusMerchant(String merchantUsername, UpdateMerchantRequest request);
 
     Page<MerchantResponse> getAllOpenMerchant(int page, int size);
 

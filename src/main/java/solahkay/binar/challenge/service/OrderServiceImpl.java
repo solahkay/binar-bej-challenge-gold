@@ -43,11 +43,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class OrderServiceImpl implements OrderService{
+public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
 
@@ -87,7 +86,6 @@ public class OrderServiceImpl implements OrderService{
         LocalDateTime localDateTime = LocalDateTime.parse(formattedLocalDateTime, FORMATTER);
 
         Order order = Order.builder()
-                .id(UUID.randomUUID().toString())
                 .code(OrderCodeGenerator.generateOrderCode())
                 .shippingAddress(request.getShippingAddress())
                 .createdAt(localDateTime)

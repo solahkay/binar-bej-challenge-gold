@@ -28,6 +28,6 @@ public class UpdateProductRequest {
 
     @NotBlank
     @Size(max = 100)
-    private String merchantName;
+    private String merchantUsername;
 
 }

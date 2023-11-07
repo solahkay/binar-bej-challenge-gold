@@ -31,6 +31,6 @@ public class CreateProductRequest {
     private Long quantity;
 
     @NotBlank
-    private String merchantName;
+    private String merchantUsername;
 
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,7 @@ import solahkay.binar.challenge.service.ProductService;
 import java.util.List;
 
 @RestController
+@RequestMapping("api/v1/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -34,7 +36,6 @@ public class ProductController {
     }
 
     @PostMapping(
-            path = "/api/v1/products",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -45,7 +46,7 @@ public class ProductController {
     }
 
     @GetMapping(
-            path = "/api/v1/products/{sku}",
+            path = "{sku}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<ProductResponse> getProduct(@PathVariable("sku") String sku) {
@@ -54,7 +55,7 @@ public class ProductController {
     }
 
     @PatchMapping(
-            path = "/api/v1/products/{sku}",
+            path = "{sku}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -65,7 +66,7 @@ public class ProductController {
     }
 
     @DeleteMapping(
-            path = "/api/v1/products/{sku}",
+            path = "delete/{sku}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -76,7 +77,6 @@ public class ProductController {
     }
 
     @GetMapping(
-            path = "/api/v1/products",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<List<ProductResponse>> getAllProduct(

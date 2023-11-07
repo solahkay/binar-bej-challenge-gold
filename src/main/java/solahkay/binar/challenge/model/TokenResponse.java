@@ -9,14 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserResponse {
+public class TokenResponse {
 
-    private String username;
-
-    private String name;
-
-    private String email;
-
-    private String merchantUsername;
+    private String token;
 
 }

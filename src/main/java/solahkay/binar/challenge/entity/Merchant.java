@@ -11,8 +11,12 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,9 +30,13 @@ import java.util.List;
 public class Merchant {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 40)
+    private String username;
+
+    @Column(unique = true, nullable = false, length = 150)
     private String name;
 
     @Column(nullable = false)
@@ -40,5 +48,9 @@ public class Merchant {
 
     @OneToMany(mappedBy = "merchant", fetch = FetchType.EAGER)
     private List<Product> products = new LinkedList<>();
+
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
 }
