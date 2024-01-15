@@ -1,4 +1,4 @@
-# Binar BEJ Challenge 6
+# Binar BEJ Challenge 7
 
 ![Static Badge](https://img.shields.io/badge/status-uwu-brightgreen)
 
